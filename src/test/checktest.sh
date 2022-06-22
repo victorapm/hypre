@@ -27,7 +27,7 @@ EOF
 esac
 
 RESET=`shopt -p nullglob`  # Save current nullglob setting
-shopt -s nullglob          # Return an empty string for failed wildcard matches 
+shopt -s nullglob          # Return an empty string for failed wildcard matches
 if [ "x$1" = "x" ]
 then
    testdirs=`echo TEST*`   # All TEST directories
@@ -35,6 +35,7 @@ else
    testdirs=`echo $*`      # Only the specified test directories
 fi
 $RESET                     # Restore nullglob setting
+STATUS=0
 
 echo ""
 for testdir in $testdirs
@@ -48,6 +49,7 @@ do
          if [ $SZ != 0 ]
          then
             echo "FAILED : $file  ($SZ)"
+            STATUS=1
          else
             echo "    OK : $file"
          fi
@@ -55,3 +57,5 @@ do
       echo ""
    fi
 done
+
+exit $STATUS
