@@ -21,3 +21,5 @@ jobs:
       run: cd src/; make -j
     - name: Drivers
       run: cd src/test/; make all
+    - name: Tests
+      run: cd src/test/; ./runtest TEST_ij/*.sh; ./checktest.sh TEST_ij/;
