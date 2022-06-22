@@ -13,9 +13,11 @@ jobs:
 
     steps:
     - uses: actions/checkout@v3
-    - name: configure
+    - name: Setup MPI
+      run: sudo apt-get install mpich libmpich-dev
+    - name: Configure
       run: cd src/; ./configure
-    - name: make
+    - name: Make
       run: cd src/; make -j
-    - name: drivers
+    - name: Drivers
       run: cd src/test/; make all
