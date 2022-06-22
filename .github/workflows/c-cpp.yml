@@ -14,8 +14,8 @@ jobs:
     steps:
     - uses: actions/checkout@v3
     - name: configure
-      run: ./configure
+      run: cd src/; ./configure
     - name: make
-      run: cd src/; make -j
+      run: make -j
     - name: drivers
       run: cd test/; make all
