@@ -16,6 +16,6 @@ jobs:
     - name: configure
       run: cd src/; ./configure
     - name: make
-      run: make -j
+      run: cd src/; make -j
     - name: drivers
-      run: cd test/; make all
+      run: cd src/test/; make all
