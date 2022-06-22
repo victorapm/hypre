@@ -22,4 +22,4 @@ jobs:
     - name: Drivers
       run: cd src/test/; make all
     - name: Tests
-      run: cd src/test/; bash ./runtest.sh TEST_ij/*.sh; bash ./checktest.sh TEST_ij/;
+      run: cd src/test/; bash ./runtest.sh TEST_ij/versioncheck.sh; bash ./checktest.sh TEST_ij/ | grep "FAILED"
