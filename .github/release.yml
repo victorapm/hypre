@@ -1,0 +1,8 @@
+# .github/release.yml
+
+changelog:
+  categories:
+    - title: Changes
+      labels:
+        - For a summary of the changes between this and the previous release, see [CHANGELOG](https://github.com/victorapm/hypre/blob/master/CHANGELOG#L10-L21) 
+        **Full Changelog**: https://github.com/victorapm/hypre/compare/v2.25.0...v2.26.0
