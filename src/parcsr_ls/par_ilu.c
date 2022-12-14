@@ -17,7 +17,7 @@
 
 /* Create */
 void *
-hypre_ILUCreate()
+hypre_ILUCreate( void )
 {
    hypre_ParILUData                       *ilu_data;
 
@@ -42,6 +42,7 @@ hypre_ILUCreate()
    hypre_ParILUDataFTempUpper(ilu_data) = NULL;
    hypre_ParILUDataUTempLower(ilu_data) = NULL;
    hypre_ParILUDataMatAFakeDiagonal(ilu_data) = NULL;
+   hypre_ParILUDataADiagDiag(ilu_data) = NULL;
 #endif
 
    /* general data */
@@ -73,6 +74,7 @@ hypre_ILUCreate()
    hypre_ParILUDataUTemp(ilu_data) = NULL;
    hypre_ParILUDataXTemp(ilu_data) = NULL;
    hypre_ParILUDataYTemp(ilu_data) = NULL;
+   hypre_ParILUDataZTemp(ilu_data) = NULL;
    hypre_ParILUDataUExt(ilu_data) = NULL;
    hypre_ParILUDataFExt(ilu_data) = NULL;
    hypre_ParILUDataResidual(ilu_data) = NULL;
@@ -255,6 +257,11 @@ hypre_ILUDestroy( void *data )
       hypre_TFree( hypre_ParILUDataMatAFakeDiagonal(ilu_data), HYPRE_MEMORY_DEVICE);
       hypre_ParILUDataMatAFakeDiagonal(ilu_data) = NULL;
    }
+   if (hypre_ParILUDataADiagDiag(ilu_data))
+   {
+      hypre_SeqVectorDestroy(hypre_ParILUDataADiagDiag(ilu_data));
+      hypre_ParILUDataADiagDiag(ilu_data) = NULL;
+   }
 #endif
 
    /* final residual vector */
@@ -288,6 +295,11 @@ hypre_ILUDestroy( void *data )
    {
       hypre_ParVectorDestroy( hypre_ParILUDataYTemp(ilu_data) );
       hypre_ParILUDataYTemp(ilu_data) = NULL;
+   }
+   if (hypre_ParILUDataZTemp(ilu_data))
+   {
+      hypre_SeqVectorDestroy(hypre_ParILUDataZTemp(ilu_data));
+      hypre_ParILUDataZTemp(ilu_data) = NULL;
    }
    if (hypre_ParILUDataUExt(ilu_data))
    {
@@ -3725,7 +3737,7 @@ hypre_ParILURAPSchurGMRESMatvecDestroyH( void *matvec_data )
 
 /* Create */
 void *
-hypre_NSHCreate()
+hypre_NSHCreate( void )
 {
    hypre_ParNSHData  *nsh_data;
 
@@ -3830,7 +3842,7 @@ hypre_NSHDestroy( void *data )
 
 /* Print solver params */
 HYPRE_Int
-hypre_NSHWriteSolverParams(void *nsh_vdata)
+hypre_NSHWriteSolverParams( void *nsh_vdata )
 {
    hypre_ParNSHData  *nsh_data = (hypre_ParNSHData*) nsh_vdata;
    hypre_printf("Newton–Schulz–Hotelling Setup parameters: \n");

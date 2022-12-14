@@ -21,7 +21,7 @@
 //#include "dsuperlu.h"
 //#endif
 
-#if defined(HYPRE_USING_CUDA)
+#if defined(HYPRE_USING_GPU)
 void hypre_NoGPUSupport(char *option)
 {
    char msg[256];
@@ -44,7 +44,7 @@ void hypre_NoGPUSupport(char *option)
 
 /* Create */
 void *
-hypre_MGRCreate()
+hypre_MGRCreate(void)
 {
    hypre_ParMGRData  *mgr_data;
 
@@ -59,7 +59,7 @@ hypre_MGRCreate()
    /* general data */
    (mgr_data -> max_num_coarse_levels) = 10;
    (mgr_data -> A_array) = NULL;
-#if defined(HYPRE_USING_CUDA)
+#if defined(HYPRE_USING_GPU)
    (mgr_data -> P_FF_array) = NULL;
 #endif
    (mgr_data -> P_array) = NULL;
@@ -272,7 +272,7 @@ hypre_MGRDestroy( void *data )
       }
    }
 
-#if defined(HYPRE_USING_CUDA)
+#if defined(HYPRE_USING_GPU)
    if (mgr_data -> P_FF_array)
    {
       for (i = 0; i < num_coarse_levels; i++)
@@ -457,7 +457,7 @@ hypre_MGRDestroy( void *data )
 
 /* create data for Gaussian Elim. for F-relaxation */
 void *
-hypre_MGRCreateGSElimData()
+hypre_MGRCreateGSElimData( void )
 {
    hypre_ParAMGData  *gsdata = hypre_CTAlloc(hypre_ParAMGData,  1, HYPRE_MEMORY_HOST);
 
@@ -486,7 +486,7 @@ hypre_MGRDestroyGSElimData( void *data )
 
 /* Create data for V-cycle F-relaxtion */
 void *
-hypre_MGRCreateFrelaxVcycleData()
+hypre_MGRCreateFrelaxVcycleData( void )
 {
    hypre_ParAMGData  *vdata = hypre_CTAlloc(hypre_ParAMGData,  1, HYPRE_MEMORY_HOST);
 
@@ -1281,7 +1281,7 @@ hypre_MGRBuildPHost( hypre_ParCSRMatrix   *A,
 
    if (method > 0)
    {
-      hypre_ParCSRMatrixGenerateFFFC(A, CF_marker, num_cpts_global, NULL, &A_FC, &A_FF);
+      hypre_ParCSRMatrixGenerateFFFCHost(A, CF_marker, num_cpts_global, NULL, &A_FC, &A_FF);
       diag = hypre_CTAlloc(HYPRE_Complex, nfpoints, memory_location_P);
       if (method == 1)
       {
@@ -3408,14 +3408,14 @@ hypre_MGRBuildInterp(hypre_ParCSRMatrix   *A,
    hypre_ParCSRMatrix    *P_ptr = NULL;
    //HYPRE_Real       jac_trunc_threshold = trunc_factor;
    //HYPRE_Real       jac_trunc_threshold_minus = 0.5*jac_trunc_threshold;
-#if defined(HYPRE_USING_CUDA)
+#if defined (HYPRE_USING_CUDA) || defined (HYPRE_USING_HIP)
    HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1( hypre_ParCSRMatrixMemoryLocation(A) );
 #endif
 
    /* Interpolation for each level */
    if (interp_type < 3)
    {
-#if defined(HYPRE_USING_CUDA)
+#if defined (HYPRE_USING_CUDA) || defined (HYPRE_USING_HIP)
       if (exec == HYPRE_EXEC_DEVICE)
       {
          hypre_MGRBuildPDevice(A, CF_marker, num_cpts_global, interp_type, &P_ptr);
@@ -3442,7 +3442,7 @@ hypre_MGRBuildInterp(hypre_ParCSRMatrix   *A,
    }
    else if (interp_type == 4)
    {
-#if defined(HYPRE_USING_CUDA)
+#if defined (HYPRE_USING_CUDA) || defined (HYPRE_USING_HIP)
       if (exec == HYPRE_EXEC_DEVICE)
       {
          hypre_NoGPUSupport("interpolation");
@@ -3471,7 +3471,7 @@ hypre_MGRBuildInterp(hypre_ParCSRMatrix   *A,
    }
    else if (interp_type == 12)
    {
-#if defined(HYPRE_USING_CUDA)
+#if defined (HYPRE_USING_CUDA) || defined (HYPRE_USING_HIP)
       if (exec == HYPRE_EXEC_DEVICE)
       {
          hypre_NoGPUSupport("interpolation");
@@ -3518,7 +3518,7 @@ hypre_MGRBuildRestrict(hypre_ParCSRMatrix     *A,
    hypre_ParCSRMatrix    *ST = NULL;
    //   HYPRE_Real       jac_trunc_threshold = trunc_factor;
    //   HYPRE_Real       jac_trunc_threshold_minus = 0.5*jac_trunc_threshold;
-#if defined(HYPRE_USING_CUDA)
+#if defined (HYPRE_USING_CUDA) || defined (HYPRE_USING_HIP)
    HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1( hypre_ParCSRMatrixMemoryLocation(A) );
 #endif
 
@@ -3531,7 +3531,7 @@ hypre_MGRBuildRestrict(hypre_ParCSRMatrix     *A,
    /* Restriction for each level */
    if (restrict_type == 0)
    {
-#if defined(HYPRE_USING_CUDA)
+#if defined (HYPRE_USING_CUDA) || defined (HYPRE_USING_HIP)
       if (exec == HYPRE_EXEC_DEVICE)
       {
          hypre_MGRBuildPDevice(A, CF_marker, num_cpts_global, restrict_type, &R_ptr);
@@ -3546,7 +3546,7 @@ hypre_MGRBuildRestrict(hypre_ParCSRMatrix     *A,
    }
    else if (restrict_type == 1 || restrict_type == 2)
    {
-#if defined(HYPRE_USING_CUDA)
+#if defined (HYPRE_USING_CUDA) || defined (HYPRE_USING_HIP)
       if (exec == HYPRE_EXEC_DEVICE)
       {
          hypre_MGRBuildPDevice(AT, CF_marker, num_cpts_global, restrict_type, &R_ptr);
@@ -3568,7 +3568,7 @@ hypre_MGRBuildRestrict(hypre_ParCSRMatrix     *A,
    }
    else if (restrict_type == 12)
    {
-#if defined(HYPRE_USING_CUDA)
+#if defined (HYPRE_USING_CUDA) || defined (HYPRE_USING_HIP)
       if (exec == HYPRE_EXEC_DEVICE)
       {
          hypre_NoGPUSupport("restriction");
@@ -3600,7 +3600,7 @@ hypre_MGRBuildRestrict(hypre_ParCSRMatrix     *A,
          HYPRE_Int point_type = CF_marker[i];
          f_marker[i] = -point_type;
       }
-#if defined(HYPRE_USING_CUDA)
+#if defined (HYPRE_USING_CUDA) || defined (HYPRE_USING_HIP)
       if (exec == HYPRE_EXEC_DEVICE)
       {
          hypre_NoGPUSupport("restriction");
